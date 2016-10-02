@@ -1,0 +1,4 @@
+- improve compatibility with ruber ducky scripts
+- improve keyboard layout models
+- add more keyboard layouts
+- compress the binaries (8 bytes for each key combinaison is a bit overkill)
