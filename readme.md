@@ -145,23 +145,10 @@ Warning: the binary output of this encode has not the same structure as the outp
 
 "Arduino Tutorial: SD card module Micro SD tutorial DIY", [https://www.youtube.com/watch?v=sS_oW81NweI](https://www.youtube.com/watch?v=sS_oW81NweI) 
 
-put a script.txt file on on an micro-sd card accessible from the arduino. This file could contain a script that tell the arduino what to type. (see the rubber ducky script langage)
 
-send the collected data on a server (via the attacked pc)
-
-save the colected data on a micro-sd card
-
-manage the languages
-
-
-special firmware for HID + serial : https://github.com/NicoHood/Hoodloader
-
-Micro sd - Arduino 
-https://www.youtube.com/watch?v=sS_oW81NweI
-
-Note that the keyboard layouts weren’t scrupulously tested. They may contain some error and produce unexpected results. Please open an issue if you happen to find one.
 
 
 # TODO
 
 - Fix & complete the keyboard layouts (+ add new ones)
+- Test more ducky scripts. (fix the `~` character in the keyboard layouts to make sudoPswGrabber work)
