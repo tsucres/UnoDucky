@@ -17,8 +17,9 @@ void setup() {
   closeFile();
 
   openFile("test.txt");
-  Serial.println(readLine());
-  Serial.println(readLine());
+  Serial.print("Reading from test.txt: ");
+  Serial.print(readLine());
+  Serial.println();
   closeFile();
 
 }
@@ -47,7 +48,8 @@ int createFile(char const *filename)
 
   if (file)
   {
-    Serial.println("File created successfully.");
+    Serial.print(filename);
+    Serial.print(" created successfully.\n");
     return 1;
   } else
   {
@@ -61,12 +63,13 @@ int writeToFile(char const *text)
   if (file)
   {
     file.println(text);
-    Serial.println("Writing to file: ");
-    Serial.println(text);
+    Serial.print("Writing in the opened file: ");
+    Serial.print(text);
+    Serial.println();
     return 1;
   } else
   {
-    Serial.println("Couldn't write to file");
+    Serial.println("Couldn't write in the file");
     return 0;
   }
 }
@@ -85,11 +88,12 @@ int openFile(char const *filename)
   file = SD.open(filename);
   if (file)
   {
-    Serial.println("File opened with success!");
+    Serial.print(filename);
+    Serial.print(" opened with success!\n");
     return 1;
   } else
   {
-    Serial.println("Error opening file...");
+    Serial.println("Error opening the file...");
     return 0;
   }
 }

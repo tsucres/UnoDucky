@@ -2,15 +2,16 @@ import sys
 import os
 import argparse
 
-import keyboard
-#import en_en
-#import fr_be
 
 
 current_line = 0
 ducky_script = ""
 ducky_lines = []
 
+# =======================================================
+# The following functions handle each a rubber ducky 
+# command. They take the eventual parameter as argument.
+# =======================================================
 
 def ducky_STRING(text):
     rtn = b''
@@ -33,74 +34,44 @@ def ducky_DELAY(delay):
         raise Exception("Invalid delay")
     return rtn
 
-"""
 def ducky_ALT(control):
-    rtn = b''
-    if control != "": # ALT + something
-        if control in en_en.keys:
-            rtn = bytes_or(en_en.modifiers["ALT"], en_en.keys[control])
-        else:
-            raise Exception("Unknown key : \""+control+"\"")
-    else: # Just ALT
-        rtn = en_en.keys["ALT"]
-    return rtn
+    return ducky_MODIFIERS(["ALT"], control)
 
 def ducky_SHIFT(control):
-    rtn = b''
-    if control != "": # SHIFT + something
-        if control in en_en.keys:
-            rtn = bytes_or(en_en.modifiers["SHIFT"], en_en.keys[control])
-        else:
-            raise Exception("Unknown key : \""+control+"\"")
-    else: # Just SHIFT
-        rtn = en_en.keys["SHIFT"]
-    return rtn
+    return ducky_MODIFIERS(["SHIFT"], control)
 
 def ducky_CTRL(control):
-    rtn = b''
-    if control != "": # CTRL + something
-        if control in en_en.keys:
-            rtn = bytes_or(en_en.modifiers["CTRL"], en_en.keys[control])
-        else:
-            raise Exception("Unknown key : \""+control+"\"")
-    else: # Just CTRL
-        rtn = en_en.keys["CTRL"]
-    return rtn
+    return ducky_MODIFIERS(["CTRL"], control)
 
 def ducky_COMMAND(control):
-    rtn = b''
-    if control != "": # COMMAND + something
-        if control in en_en.keys:
-            rtn = bytes_or(en_en.modifiers["COMMAND"], en_en.keys[control])
-        else:
-            raise Exception("Unknown key : \""+control+"\"")
-    else: # Just COMMAND
-        rtn = en_en.keys["COMMAND"]
-    return rtn
-
+    return ducky_MODIFIERS(["COMMAND"], control)
 
 def ducky_GUI(control):
-    rtn = b''
-    if control != "": # GUI + something
-        if control in en_en.keys:
-            rtn = bytes_or(en_en.modifiers["GUI"], en_en.keys[control])
-        else:
-            raise Exception("Unknown key : \""+control+"\"")
-    else: # Just GUI
-        rtn = en_en.keys["GUI"]
-    return rtn
-
-"""
-
+    return ducky_MODIFIERS(["GUI"], control)
+    
+def ducky_ESC(control):
+    return ducky_MODIFIERS(["ESC"], control)
+    
 def ducky_MODIFIERS(modifier_keys, control):
     """ 
-        used for ALT, CTRL, SHIFT, COMMAND, GUI, 
+        Returns the bytcode corespnding to the association of the 
+        modifier key (ALT, CTRL, ...) and another key.
+
+        Parameters
+        -----------
+        modifier_keys: str
+            A string rpreenting a modifier key (defined in lang.modifiers)
+            One of those values: ["CTRL", "SHIFT", "ALT", "COMMAND", "GUI"]
+        control: str
+            A string representing the key. May be empty string, otherwise, 
+            must be defined in lang.keys.
     """
     rtn = b''
-    modifier_key = 0
+    modifier_key = bytearray(8)
     for k in modifier_keys:
-        modifier_key = bytes_and(lang.modifiers[k], modifier_key)
-
+        
+        modifier_key = bytes_or(lang.modifiers[k], modifier_key)
+    
     if control != "": # modifier + something
         if control.upper() in lang.keys:
             rtn = bytes_or(modifier_key, lang.keys[control.upper()])
@@ -117,6 +88,8 @@ def ducky_MODIFIERS(modifier_keys, control):
 def ducky_REPEAT(nb):
     rtn = b''
     if nb.isdigit():
+        print(int(nb))
+        print((ducky_to_hex(ducky_lines[current_line-1]))*int(nb))
         if current_line != 0:
             rtn = (ducky_to_hex(ducky_lines[current_line-1]))*int(nb)
         else:
@@ -137,26 +110,17 @@ def ducky_KEY(key):
 
 
 
-def bytes_and(a, b):
-    """ TODO: how to make an OR operation on bytes otherwise?"""
-    rtn = bytearray(b'')
-    a_b = bytearray(a)
-    b_b = bytearray(b)
-
-    if len(a_b) != len(b_b):
-        return b''
-
-    i = 0
-    while i<len(a_b):
-        rtn.append(int(a[i] & b[i]))
-        i+=1
-
-    return rtn
-
+# =======================================================
+# =======================================================
+# =======================================================
 
 def bytes_or(a, b):
-    """ TODO: how to make an OR operation on bytes otherwise?"""
-    
+    """
+        Returns
+        --------
+        bytes
+            A bitwise OR operation on the two parameters.
+    """
     rtn = bytearray(b'')
     a_b = bytearray(a)
     b_b = bytearray(b)
@@ -171,27 +135,33 @@ def bytes_or(a, b):
 
     return rtn
 
+# Dictionnary that associates a ducky command with the 
+# function that handles its translation to bytecode.
 supported_command = {
     "STRING": ducky_STRING,
     "REM": ducky_REM,
     "ENTER": ducky_ENTER,
     "DELAY": ducky_DELAY,
-    "ALT": (lambda c: ducky_MODIFIERS(["ALT"], c)), 
-    "SHIFT": (lambda c: ducky_MODIFIERS(["SHIFT"], c)), 
-    "CTRL": (lambda c: ducky_MODIFIERS(["CTRL"], c)), 
-    "CONTROL": (lambda c: ducky_MODIFIERS(["CTRL"], c)), 
-    "ESC": (lambda c: ducky_MODIFIERS(["ESC"], c)), 
-    "ESCAPE": (lambda c: ducky_MODIFIERS(["ESC"], c)), 
-    "COMMAND": (lambda c: ducky_MODIFIERS(["COMMAND"], c)), 
+    "ALT": ducky_ALT, 
+    "SHIFT": ducky_SHIFT, 
+    "CTRL": ducky_CTRL, 
+    "CONTROL": ducky_CTRL, 
+    "ESC": ducky_ESC, 
+    "ESCAPE": ducky_ESC, 
+    "COMMAND": ducky_COMMAND, 
     "REPEAT": ducky_REPEAT,
-    "GUI": (lambda c: ducky_MODIFIERS("GUI", c)), 
-    "WINDOWS": (lambda c: ducky_MODIFIERS("GUI", c)), 
+    "GUI": ducky_GUI, 
+    "WINDOWS": ducky_GUI, 
     "CTRL-SHIFT": (lambda c: ducky_MODIFIERS(["CTRL", "SHIFT"], c)), 
 }
 
 def char_to_byte(c):
     """
-        convert a character to the key combinaison that produces it, expressed in a row of height bytes
+        Converts a character to the key combinaison that produces it, expressed in a height bytes long bytecode.
+        Parameters
+        ----------
+        c : str
+            A single character, well defined in lang.chars.
     """
     rtn = b''
     if c in lang.chars:
@@ -203,7 +173,7 @@ def char_to_byte(c):
 
 def ducky_to_hex(ducky_line):
     """
-        take a line of duccky script and return an encoded equivalent for the arduino
+        Takes a line of ducky script and returns an encoded, equivalent bytecode, for the arduino
     """
     command = ducky_line.split(maxsplit=1)
     rtn = b''
@@ -222,19 +192,17 @@ def ducky_to_hex(ducky_line):
     return rtn
 
 
-def compile_ducky():
+def encode_ducky():
     global ducky_lines, current_line
 
     ducky_lines = ducky_script.split('\n')
-    print(ducky_lines)
     rtn = b''
     while current_line < len(ducky_lines):
         l = ducky_lines[current_line]
         try:
-            print(l)
             rtn += ducky_to_hex(l)
         except Exception as e:
-            raise Exception("Syntax error at line " + str(current_line) + " in the script : \n" + str(e))
+            raise Exception("Syntax error at line " + str(current_line+1) + " in the script : \n" + str(e))
 
         current_line += 1
 
@@ -243,12 +211,13 @@ def compile_ducky():
 
 
 def generate_output_filename(input_filename):
+    """ Returns the input_filename with a new extention """
     return os.path.splitext(input_filename)[0]+'.bin'
 
 parser = argparse.ArgumentParser()
-parser.add_argument('-i', '--input_file', action='store', help="Input file", required=True)
+parser.add_argument('-i', '--input_file', action='store', help="Input filename", required=True)
 parser.add_argument('-o', '--output_file', action='store', help="Output filename", required=False)
-parser.add_argument('-l', '--key_layout', action='store', choices=['en_en', 'fr_be'], help="Keyboard layout", required=False, default='en_en')
+parser.add_argument('-l', '--key_layout', action='store', choices=['en_us', 'fr_be'], help="Keyboard layout", required=False, default='en_us')
 args = parser.parse_args()
 
 lang = __import__(args.key_layout)
@@ -260,9 +229,8 @@ f = open(args.input_file, "r")
 ducky_script = f.read()
 f.close()
 
-compiled = compile_ducky()
+compiled = encode_ducky()
 
-#print(compiled)
 
 fo = open(args.output_file, "wb+")
 fo.write(compiled)

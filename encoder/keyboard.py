@@ -1,3 +1,4 @@
+#source: https://github.com/hak5darren/USB-Rubber-Ducky/blob/master/Encoder/resources/keyboard.properties
 #default keys
 MODIFIERKEY_CTRL = 0x01
 MODIFIERKEY_SHIFT = 0x02

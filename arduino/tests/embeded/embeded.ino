@@ -1,6 +1,3 @@
-/* Arduino USB HID Keyboard Demo
- * Random Key/Random Delay
- */
 #include "SdFat.h"
 SdFat SD;
 

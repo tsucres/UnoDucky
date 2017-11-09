@@ -1,7 +1,7 @@
 #include "SdFat.h"
 #include <LiquidCrystal.h>
 #include <string.h>
-#define DEBUG false
+
 
 
 LiquidCrystal lcd(8, 7, 5, 4, 3, 2);
@@ -20,14 +20,6 @@ static const int DELAY_A_RELEASE = 30; // How many millis after release
 
 File root;
 File currentFile;
-
-
-
-void debug(char const *text) {
-  if (DEBUG) {
-    Serial.println(text);
-  }
-}
 
 
 void setup() {
@@ -77,16 +69,11 @@ void loop() {
 
 
 void initializeSD() {
-  /**
-   * Initialize SD module
-   */
-  debug("Initializing SD card...");
   pinMode(SD_CS_PIN, OUTPUT);
 
-  if (SD.begin()) {
-    debug("SD card is ready to use.");
-  } else {
-    debug("SD card initialization failed");
+  if (!SD.begin()) {
+    lcd.clear();
+    lcd.print("Error: SD init");
   }
   return;
 }
@@ -113,14 +100,14 @@ void printFileOnLCD(File f) {
   lcd.clear();
   lcd.print(fileName);
   lcd.setCursor(0,1);
-  lcd.print(f.size());
+  lcd.print(f.size());// + " b");
 }
 
 
 int read8Bytes(char* buf) {
   /**
    * Copy 8 bytes from the current file to the specified buffer.
-   * Return the number of bytes successfully read.
+   * Returns the number of bytes successfully read.
    */
   int i = 0;
   while (i != 8)
@@ -136,7 +123,7 @@ int read8Bytes(char* buf) {
 
 void releaseKey(char* buf) 
 {
-  buf = {0};
+  memset(buf, 0, 8);
   Serial.write(buf, 8); // Release key  
 }
 
@@ -148,9 +135,9 @@ void playCurrentFile() {
   char buf[8] = { 0 };
   while (read8Bytes(buf)) {
     if (buf[0] == 0x07) { // Delay
-      uint8_t d[7];
-      memcpy(d, &buf[1], 7 * sizeof(uint8_t));
-      delay((int)d);
+      uint8_t delay_time[7];
+      memcpy(delay_time, &buf[1], 7 * sizeof(uint8_t));
+      delay((int)delay_time);
     }
     else {
       Serial.write(buf, 8);

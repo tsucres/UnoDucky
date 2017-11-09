@@ -36,14 +36,14 @@ void setup() {
 }
 
 void loop() {
-  int currentButtonState = digitalRead(BUTTON_PIN);
+  int currentNextButtonState = digitalRead(BTN_NEXT_PIN);
   
-  if (currentButtonState != nextButtonState) {
-    if (currentButtonState == HIGH) {
+  if (currentNextButtonState != nextButtonState) {
+    if (currentNextButtonState == HIGH) {
       currentFile = getNextFile();
       printFileOnLCD(currentFile);
     }
-    nextButtonState = currentButtonState;
+    nextButtonState = currentNextButtonState;
   }
 }
 
@@ -70,7 +70,7 @@ File getNextFile() {
   } 
   while (entry.isDir()) {
     entry = root.openNextFile();
-  } // TODO: what if there's no file? how to stop?
+  } // TODO: what if there's no file? If there are only folders, this will never stop...
   return entry;
 }
 
